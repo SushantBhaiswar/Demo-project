@@ -1,6 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
-import toast, { Toaster } from 'react-hot-toast';
+import toast from 'react-hot-toast';
 
 function App() {
   const [totalScore, setTotalScore] = useState('')
@@ -10,13 +10,17 @@ function App() {
   const [show, setShow] = useState(true)
   const [time, setTime] = useState(5)
   const [playing, setPlaying] = useState(false)
+  const [opponentScoreGot, setOpponentScoreGot] = useState(false)
+
   const getOpponentScore = () => {
     const TotalScr = Math.round(Math.random() * 36)
     setTotalScore(TotalScr)
     setNeedToWin(TotalScr)
     setTotalBall(6)
     setYourScore(0);
+    setOpponentScoreGot(true)
   }
+
   const waitFor5Sec = () => {
     if (show) {
       const intervalId = setInterval(() => {
@@ -25,6 +29,7 @@ function App() {
 
       setTimeout(() => {
         setShow(true);
+        setOpponentScoreGot(false)
         setNeedToWin(0);
         setYourScore(0);
         setTotalBall(0);
@@ -36,13 +41,13 @@ function App() {
   };
 
   useEffect(() => {
-    if (totalScore < yourScore) {
+    if (totalScore < yourScore && opponentScoreGot) {
       toast.success(`Congrulation you won the match!`)
       setShow(false)
       waitFor5Sec()
     }
-    if (totalBall == 0) {
-      if (totalScore == yourScore) {
+    if (totalBall === 0 && opponentScoreGot) {
+      if (totalScore === yourScore) {
         toast.success(`Match drawn`)
         setShow(false)
         waitFor5Sec()
@@ -53,7 +58,7 @@ function App() {
         waitFor5Sec()
       }
     }
-  }, [totalBall, yourScore])
+  }, [totalBall, yourScore, opponentScoreGot])
 
 
   const playBall = () => {
@@ -74,15 +79,30 @@ function App() {
     }, 2000);
 
   }
-
+  const lastBall = [0, 5, "W", 8]
   return (
-    <>
-      {show ? <>
-        <h2>NEED {needToWin} RUN IN {totalBall} BALL </h2>
-        <h2>YOUR SCORE : {yourScore} </h2>
-        <button onClick={getOpponentScore}>OPPONENT SCORE</button>
-        <button onClick={playBall}> {playing ? "PLAYING..." : "PLAY BALL"}</button>
-      </> : <h1>Please Wait {time}...</h1>}</>
+
+    <div className='Main-Box'>
+      <div className='Score-Card'>
+        {
+          show ? <>
+            {opponentScoreGot ? <h2>OPPONENT SCORE : {totalScore}</h2> : ''}
+            <h2>NEED {needToWin} RUN IN {totalBall} BALL </h2>
+            <h2>YOUR SCORE : {yourScore} </h2>
+            <div className='Last-Ball-Played' >  {lastBall.map((el) => <h1>{el}</h1>)}</div>
+          </> : <h1>Please Wait {time}...</h1>
+        }
+      </div>
+
+      <div className='Play-Buttons'>
+        {
+          !opponentScoreGot ?
+            <button className='Opponent-Button' onClick={getOpponentScore}>OPPONENT SCORE</button> :
+            <button className='Play-Ball-Button' onClick={playBall}> {playing ? "PLAYING..." : "PLAY BALL"}</button>
+        }
+      </div>
+
+    </div>
   );
 }
 
